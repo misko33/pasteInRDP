@@ -1,5 +1,5 @@
 param (
-    [string]$InputPath = "input.txt",
+    [string]$InputPath  = "input.txt",
     [string]$OutputPath = "output.txt"
 )
 
@@ -8,22 +8,17 @@ if (-not (Test-Path $InputPath)) {
     exit 1
 }
 
-$lines = Get-Content $InputPath
-$cleanedLines = @()
+$content = Get-Content $InputPath -Raw
 
-foreach ($line in $lines) {
-    $output = ""
-    $prev = ""
+$sb   = [System.Text.StringBuilder]::new()
+$prev = [char]0
 
-    foreach ($char in $line.ToCharArray()) {
-        if ($char -ne $prev) {
-            $output += $char
-        }
-        $prev = $char
+foreach ($c in $content.ToCharArray()) {
+    if ($c -ne $prev) {
+        [void]$sb.Append($c)
     }
-
-    $cleanedLines += $output
+    $prev = $c
 }
 
-$cleanedLines | Set-Content $OutputPath -Encoding UTF8
+$sb.ToString() | Set-Content $OutputPath -Encoding UTF8 -NoNewline
 Write-Host "Cleaned file saved to $OutputPath" -ForegroundColor Green
