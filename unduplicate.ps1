@@ -20,5 +20,7 @@ foreach ($c in $content.ToCharArray()) {
     $prev = $c
 }
 
-$sb.ToString() | Set-Content $OutputPath -Encoding UTF8 -NoNewline
+$clean = ($sb.ToString()) -replace '(\r?\n)+', "`r`n"
+
+$clean | Set-Content $OutputPath -Encoding UTF8 -NoNewline
 Write-Host "Cleaned file saved to $OutputPath" -ForegroundColor Green
