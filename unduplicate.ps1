@@ -8,18 +8,16 @@ if (-not (Test-Path $InputPath)) {
     exit 1
 }
 
-# Read whole file (keeps CR/LF)
 $content = Get-Content $InputPath -Raw
 
 $sb   = [System.Text.StringBuilder]::new()
-$prev = [char]0                            # sentinel
+$prev = [char]0
 
-foreach ($c in $content.ToCharArray()) {   # deduplicate consecutive chars
+foreach ($c in $content.ToCharArray()) {
     if ($c -ne $prev) { [void]$sb.Append($c) }
     $prev = $c
 }
 
-# also collapse exactly one extra blank line  (CRLFCRLF → CRLF)
 $result = ($sb.ToString()) -replace '(\r\n){2}', "`r`n"
 
 $result | Set-Content $OutputPath -Encoding UTF8 -NoNewline
