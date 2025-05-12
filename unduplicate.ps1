@@ -8,19 +8,17 @@ if (-not (Test-Path $InputPath)) {
     exit 1
 }
 
-$content = Get-Content $InputPath -Raw
+$content = (Get-Content $InputPath -Raw) -replace "`r`n|`r", "`n"
 
 $sb   = [System.Text.StringBuilder]::new()
 $prev = [char]0
 
 foreach ($c in $content.ToCharArray()) {
-    if ($c -ne $prev) {
-        [void]$sb.Append($c)
-    }
+    if ($c -ne $prev) { [void]$sb.Append($c) }
     $prev = $c
 }
 
-$clean = ($sb.ToString()) -replace '(\r?\n)+', "`r`n"
+($sb.ToString() -replace "`n", "`r`n") |
+    Set-Content $OutputPath -Encoding UTF8 -NoNewline
 
-$clean | Set-Content $OutputPath -Encoding UTF8 -NoNewline
 Write-Host "Cleaned file saved to $OutputPath" -ForegroundColor Green
