@@ -8,17 +8,19 @@ if (-not (Test-Path $InputPath)) {
     exit 1
 }
 
-$content = (Get-Content $InputPath -Raw) -replace "`r`n|`r", "`n"
+# Read whole file (keeps CR/LF)
+$content = Get-Content $InputPath -Raw
 
 $sb   = [System.Text.StringBuilder]::new()
-$prev = [char]0
+$prev = [char]0                            # sentinel
 
-foreach ($c in $content.ToCharArray()) {
+foreach ($c in $content.ToCharArray()) {   # deduplicate consecutive chars
     if ($c -ne $prev) { [void]$sb.Append($c) }
     $prev = $c
 }
 
-($sb.ToString() -replace "`n", "`r`n") |
-    Set-Content $OutputPath -Encoding UTF8 -NoNewline
+# also collapse exactly one extra blank line  (CRLFCRLF → CRLF)
+$result = ($sb.ToString()) -replace '(\r\n){2}', "`r`n"
 
+$result | Set-Content $OutputPath -Encoding UTF8 -NoNewline
 Write-Host "Cleaned file saved to $OutputPath" -ForegroundColor Green
